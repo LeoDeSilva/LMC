@@ -1,0 +1,13 @@
+lda A
+sta CHAR
+_start  lda CHAR
+        otc
+        add ONE
+        sta CHAR
+        sub Z
+        blt _start
+        
+A     dat 65
+Z     dat 91
+ONE   dat 1
+CHAR  dat
