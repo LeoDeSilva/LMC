@@ -1,0 +1,5 @@
+        inp
+_loop   sub ONE
+        out
+        bgt _loop
+ONE     dat 1

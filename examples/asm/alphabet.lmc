@@ -1,11 +1,11 @@
 lda A
 sta CHAR
-_start  lda CHAR
+_loop  lda CHAR
         otc
         add ONE
         sta CHAR
         sub Z
-        blt _start
+        blt _loop
         
 A     dat 65
 Z     dat 91

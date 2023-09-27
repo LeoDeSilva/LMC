@@ -1,0 +1,22 @@
+_start      inp
+            sta NUMBER
+
+            inp
+            sta TIMES
+
+_loop       lda RESULT
+            add NUMBER
+            sta RESULT
+
+            lda TIMES
+            sub ONE
+            sta TIMES
+            bgt _loop
+
+_end        lda RESULT
+            out
+
+NUMBER      dat 0
+TIMES       dat 0
+RESULT      dat 0 
+ONE         dat 1
