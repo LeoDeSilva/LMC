@@ -1,0 +1,36 @@
+a       dat 0
+        inp
+        sta a
+
+b       dat 0
+        inp
+        sta b
+
+c       dat 0
+
+        lda a 
+        sub b
+        bgt if
+
+        lda a
+        sub b
+        brz elif
+
+        bra else
+
+if      lda a
+        sta c
+        bra endif
+
+elif    lda ZERO 
+        sta c
+        bra endif
+
+else    lda b
+        sta c
+        bra endif
+
+endif   lda c
+        out
+
+ZERO    dat 0

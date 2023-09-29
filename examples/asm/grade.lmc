@@ -1,0 +1,47 @@
+_main
+score   dat 0 
+        inp
+        sta score
+
+grade   dat 0
+        lda ZERO
+        sta grade
+
+        lda score
+        sub SVTYF
+        bgt then
+        brz then
+
+        lda score
+        sub FIFTY
+        bgt elif
+        brz elif
+
+        bra else
+
+then    
+        lda A
+        sta grade
+        bra endif
+
+elif    
+        lda B 
+        sta grade
+        bra endif
+
+else    
+        lda C
+        sta grade
+        bra endif
+
+endif   
+        lda grade
+        otc
+
+ZERO    dat 0
+SVTYF   dat 75
+FIFTY   dat 50
+
+A       dat 65
+B       dat 66
+C       dat 67
