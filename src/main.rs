@@ -1,37 +1,37 @@
-use clap::{Parser as ArgsParser};
+use clap::Parser as ClapParser;
 mod machine;
 mod assembler;
 
-#[derive(ArgsParser)]
+#[derive(ClapParser)]
 struct Cli {
     #[clap(subcommand)]
     subcommand: Subcommand,
 }
 
 
-#[derive(ArgsParser)]
+#[derive(ClapParser)]
 enum Subcommand {
     Assemble {
         path: std::path::PathBuf,
         out: std::path::PathBuf,
     }, 
 
+    Emulate {
+        path: std::path::PathBuf,
+    },
+
     Run {
         path: std::path::PathBuf,
     }
 }
 
-fn run(path: std::path::PathBuf) {
-    let program = std::fs::read(path).expect("could not read from file");
-
+fn emulate(program: Vec<u8>) {
     let mut m = machine::machine::Machine::new();
     m.load(program);
     m.emulate();
 }
 
-
-
-fn assemble(path: std::path::PathBuf, out: std::path::PathBuf) {
+fn assemble(path: std::path::PathBuf) -> Vec<u8> {
     let content = std::fs::read_to_string(path).expect("could not read file");
 
     let mut l = assembler::lexer::Lexer::new(content.chars().collect());
@@ -41,19 +41,25 @@ fn assemble(path: std::path::PathBuf, out: std::path::PathBuf) {
     let (program, symbol_table) = p.parse();
 
     let mut c = assembler::compiler::Compiler::new(program, symbol_table);
-    let bin: Vec<u8> = c.compile();
-    std::fs::write(out, bin).unwrap();
+    c.compile()
 }
 
 fn main () {
     let args = Cli::parse();    
     match args.subcommand {
         Subcommand::Assemble { path, out } => {
-            assemble(path, out);
+            let bin: Vec<u8> = assemble(path);
+            std::fs::write(out, bin).unwrap();
+        }
+
+        Subcommand::Emulate { path } => {
+            let program = std::fs::read(path).expect("could not read from file");
+            emulate(program);
         }
 
         Subcommand::Run { path } => {
-            run(path);
+            let program: Vec<u8> = assemble(path);
+            emulate(program);
         }
     }
 }

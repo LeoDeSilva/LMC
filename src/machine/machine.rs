@@ -43,13 +43,13 @@ impl Machine {
                 self.c = self.acc + self.address_operand(operand) > u16::MAX;
                 self.n = false;
 
-                self.acc += self.address_operand(operand);
+                self.acc = u16::wrapping_add(self.acc, self.address_operand(operand));
             },  
             0b0010 => { // SUB
                 self.n = self.address_operand(operand) > self.acc;
                 self.c = false;
 
-                self.acc = u16::saturating_sub(self.acc, self.address_operand(operand));
+                self.acc = u16::wrapping_sub(self.acc, self.address_operand(operand));
                 // self.acc -= self.address_operand(operand); 
             },
             0b0011 => { self.acc = self.address_operand(operand); },   // LDA
@@ -59,7 +59,7 @@ impl Machine {
             },  
             0b0101 => { self.pc = operand; },  // BRA
             0b0110 => { self.pc = if self.acc == 0 { operand } else { self.pc }  },  // BRZ
-            0b0111 => { self.pc = if self.acc > 0 { operand } else { self.pc }  },  // BGT
+            0b0111 => { self.pc = if self.acc > 0 && !self.n { operand } else { self.pc }  },  // BGT
             0b1011 => { self.pc = if self.n { operand } else { self.pc }  },  // BLT
             0b1000 => {
                 let mut line = String::new();
@@ -68,6 +68,7 @@ impl Machine {
             },  // INP
             0b1001 => { println!("{:?}", self.acc) },  // OUT
             0b1010 => { println!("{}", char::from_u32(self.acc as u32).expect("invalid ASCII char")); },  // OTC
+            0b1101 => {},
             _ => { panic!("Unexpected opcode found in emulator") }
         }
 

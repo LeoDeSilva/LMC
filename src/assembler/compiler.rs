@@ -23,11 +23,6 @@ impl Compiler {
     }
 
     fn compile_instruction(&self, instruction: parser::Instruction) -> Vec<u8> {
-        if let parser::Instruction::DAT(operand) = instruction.clone() {
-            let bin_operand = self.compile_operand(operand);
-            return vec![0, (bin_operand >> 8) as u8, bin_operand as u8];
-        }
-
         let opcode_map: fn(&parser::Instruction) -> u8 = |instruction: &parser::Instruction| match instruction {
             parser::Instruction::HLT    => 0b0000,
             parser::Instruction::ADD(_) => 0b0001,
@@ -41,7 +36,7 @@ impl Compiler {
             parser::Instruction::INP    => 0b1000,
             parser::Instruction::OUT    => 0b1001,
             parser::Instruction::OTC    => 0b1010,
-            _ => 0,
+            parser::Instruction::DAT(_) => 0b1101,
         };
 
         let operand_map = |instruction: &parser::Instruction| match instruction {
@@ -51,10 +46,8 @@ impl Compiler {
             parser::Instruction::ADD(operand) | parser::Instruction::SUB(operand) | 
             parser::Instruction::LDA(operand) | parser::Instruction::STA(operand) | 
             parser::Instruction::BRA(operand) | parser::Instruction::BRZ(operand) | 
-            parser::Instruction::BGT(operand) => self.compile_operand(operand.clone()),
-            parser::Instruction::BLT(operand) => self.compile_operand(operand.clone()),
-
-            _ => 0
+            parser::Instruction::BGT(operand) | parser::Instruction::BLT(operand) |
+            parser::Instruction::DAT(operand)  => self.compile_operand(operand.clone()),
         };
 
 
@@ -95,7 +88,7 @@ mod tests {
 
         let bin = c.compile();
         assert_eq!(bin, vec![
-            3, 0, 3, 0, 1, 0
+            3, 0, 3, 0, 0, 1
         ])
     }
 
