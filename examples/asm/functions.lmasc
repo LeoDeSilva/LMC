@@ -1,0 +1,28 @@
+bra _main
+
+_p1     dat 0
+_p2     dat 0
+_ret    dat 0
+
+_sub    lda _p1
+        sub _p2
+        sta _ret
+        ret
+
+_add    lda _p1
+        add _p2
+        sta _ret
+        ret
+
+_main   lda _10
+        sta _p1
+
+        lda _5
+        sta _p2
+
+        call _add
+        lda _ret
+        out
+
+_10     dat 10
+_5      dat 5

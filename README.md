@@ -24,7 +24,9 @@ xxxxxxxx yyyyyyyyyyyyyyyy
 * [ ] 0111   BGT      <addr>
 * [ ] 1000   IO       <op>
 * [ ] 1001   OTC      <none>
-* [ ]        DAT      <int>
+* [ ] 1100   DAT      <int>
+* [ ] 1101   CALL      <int>
+* [ ] 1110   RET      <int>
 
 lda A
 sta CHAR

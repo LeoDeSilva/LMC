@@ -2,6 +2,7 @@ use std::vec;
 
 pub struct Machine {
     pub memory: Vec<u8>,
+    stack: Vec<u16>,
     pc: u16,
     acc: u16,
     hlt: bool,
@@ -13,7 +14,7 @@ pub struct Machine {
 impl Machine {
     pub fn new() -> Self {
         let memory: Vec<u8> = vec![0; 0xffff];
-        Machine { memory: memory, pc: 0, acc: 0, hlt: false, c: false, n: false }
+        Machine { memory: memory, stack: vec![], pc: 0, acc: 0, hlt: false, c: false, n: false }
     }
 
 
@@ -68,7 +69,16 @@ impl Machine {
             },  // INP
             0b1001 => { println!("{:?}", self.acc) },  // OUT
             0b1010 => { println!("{}", char::from_u32(self.acc as u32).expect("invalid ASCII char")); },  // OTC
-            0b1101 => {},
+            0b1100 => {},
+
+            0b1101 => { // CALL
+                self.stack.push(self.pc);
+                self.pc = operand;
+            },
+
+            0b1110 => { // RET
+                self.pc = self.stack.pop().unwrap();
+            },
             _ => { panic!("Unexpected opcode found in emulator") }
         }
 

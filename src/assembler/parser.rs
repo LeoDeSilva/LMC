@@ -16,6 +16,8 @@ pub enum Instruction {
     OUT,
     OTC,
     DAT(lexer::Token),
+    CALL(lexer::Token),
+    RET,
 }
 
 pub struct Parser {
@@ -88,6 +90,8 @@ impl Parser {
             lexer::Token::OUT => Instruction::OUT,
             lexer::Token::OTC => Instruction::OTC,
             lexer::Token::DAT => Instruction::DAT(self.parse_operand()),
+            lexer::Token::CALL => Instruction::CALL(self.parse_operand()),
+            lexer::Token::RET => Instruction::RET,
             _ => { panic!("Unexpected token found in parse_instruction(): {:?}", self.tok)}
         }
 

@@ -20,6 +20,8 @@ pub enum Token {
     OUT,
     OTC,
     DAT,
+    CALL,
+    RET,
 }
 
 
@@ -121,6 +123,8 @@ impl Lexer {
             ("out", Token::OUT),
             ("otc", Token::OTC),
             ("dat", Token::DAT),
+            ("call", Token::CALL),
+            ("ret", Token::RET),
             ].iter().cloned().collect();
 
         let position = self.position;

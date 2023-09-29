@@ -36,18 +36,22 @@ impl Compiler {
             parser::Instruction::INP    => 0b1000,
             parser::Instruction::OUT    => 0b1001,
             parser::Instruction::OTC    => 0b1010,
-            parser::Instruction::DAT(_) => 0b1101,
+            parser::Instruction::DAT(_) => 0b1100,
+            parser::Instruction::CALL(_) => 0b1101,
+            parser::Instruction::RET => 0b1110,
         };
 
         let operand_map = |instruction: &parser::Instruction| match instruction {
             parser::Instruction::HLT | parser::Instruction::INP | 
-            parser::Instruction::OUT | parser::Instruction::OTC => 0,
+            parser::Instruction::OUT | parser::Instruction::OTC |
+            parser::Instruction::RET => 0,
 
             parser::Instruction::ADD(operand) | parser::Instruction::SUB(operand) | 
             parser::Instruction::LDA(operand) | parser::Instruction::STA(operand) | 
             parser::Instruction::BRA(operand) | parser::Instruction::BRZ(operand) | 
             parser::Instruction::BGT(operand) | parser::Instruction::BLT(operand) |
-            parser::Instruction::DAT(operand)  => self.compile_operand(operand.clone()),
+            parser::Instruction::DAT(operand) | parser::Instruction::CALL(operand) 
+            => self.compile_operand(operand.clone()),
         };
 
 
