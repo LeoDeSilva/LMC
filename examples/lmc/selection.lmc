@@ -1,12 +1,14 @@
-let score = input();
-let grade;
+fn main() {
+    let score = input();
+    let grade;
 
-if (score >= 75) {
-    grade = 'A';
-} elif (score >= 50) {
-    grade = 'B';
-} else {
-    grade = 'C';
+    if (score >= 75) {
+        grade = 'A';
+    } elif (score >= 50) {
+        grade = 'B';
+    } else {
+        grade = 'C';
+    }
+
+    printc(grade);
 }
-
-printc(grade);

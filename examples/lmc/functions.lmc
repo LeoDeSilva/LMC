@@ -1,0 +1,14 @@
+fn mul(a, b) {
+    let result;
+    for (let i = 0; i < b; i++) {
+        result = result + a;
+    }
+    return reuslt;
+}
+
+fn main() {
+    let a = input();
+    let b = input();
+    let result = mul(a, b);
+    print(result);
+}
