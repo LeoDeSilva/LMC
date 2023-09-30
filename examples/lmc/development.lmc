@@ -2,4 +2,11 @@ fn main() {
     let x;
     let y = 10;
     let x = sqrt(x+y);
+    x > y;
+    x == y;
+    x >= y;
+    x < y;
+    x <= y;
+    x != y;
+    !x;
 }
