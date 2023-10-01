@@ -1,28 +1,32 @@
 bra _main
 
-_p1     dat 0
-_p2     dat 0
+p1     dat 0
+p2     dat 0
 _ret    dat 0
 
-_sub    lda _p1
-        sub _p2
+_mul
+res     dat 0  
+loop    lda res
+        add p1
+        sta res
+
+        lda p2
+        sub _1
+        sta p2
+        bgt loop
+
+        lda res
         sta _ret
         ret
+        
+_main   inp
+        sta p1
 
-_add    lda _p1
-        add _p2
-        sta _ret
-        ret
+        inp
+        sta p2
 
-_main   lda _10
-        sta _p1
-
-        lda _5
-        sta _p2
-
-        call _add
+        call _mul
         lda _ret
         out
 
-_10     dat 10
-_5      dat 5
+_1      dat 1

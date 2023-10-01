@@ -81,7 +81,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_compiler() {
+    fn test_assembler() {
         let mut c = Compiler::new(vec![
             parser::Instruction::LDA(lexer::Token::Label(String::from("ONE"))),
             parser::Instruction::DAT(lexer::Token::Number(1))
@@ -92,7 +92,7 @@ mod tests {
 
         let bin = c.compile();
         assert_eq!(bin, vec![
-            3, 0, 3, 0, 0, 1
+            3, 0, 3, 12, 0, 1
         ])
     }
 

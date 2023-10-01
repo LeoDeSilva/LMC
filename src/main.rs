@@ -1,5 +1,6 @@
 use clap::Parser as ClapParser;
 mod machine;
+mod compiler;
 mod assembler;
 
 #[derive(ClapParser)]
@@ -18,6 +19,11 @@ enum Subcommand {
 
     Emulate {
         path: std::path::PathBuf,
+    },
+
+    Compile {
+        path: std::path::PathBuf,
+        out: std::path::PathBuf,
     },
 
     Run {
@@ -40,8 +46,16 @@ fn assemble(path: std::path::PathBuf) -> Vec<u8> {
     let mut p = assembler::parser::Parser::new(tokens);
     let (program, symbol_table) = p.parse();
 
-    let mut c = assembler::compiler::Compiler::new(program, symbol_table);
+    let mut c = assembler::assembler::Compiler::new(program, symbol_table);
     c.compile()
+}
+
+fn compile(program: String) -> String {
+    let mut l = compiler::lexer::Lexer::new(program.chars().collect());
+    let tokens = l.lex();
+    println!("{:?}", tokens);
+
+    String::new()
 }
 
 fn main () {
@@ -60,6 +74,12 @@ fn main () {
         Subcommand::Run { path } => {
             let program: Vec<u8> = assemble(path);
             emulate(program);
+        }
+
+        Subcommand::Compile { path, out } => {
+            let content = std::fs::read_to_string(path).expect("could not read file ");
+            println!("{}", out.display());
+            compile(content);
         }
     }
 }
