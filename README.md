@@ -45,6 +45,8 @@ CHAR  dat
 
 `lmc compile <infile.lmc> <outfile.lmasc>`
 
+Compiles `.lmc` source code into `.lmasc` assembly.
+
 ```rust
 fn mul(a, b) {
     let result;
