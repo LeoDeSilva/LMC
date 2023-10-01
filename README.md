@@ -42,7 +42,8 @@ ONE   dat 1
 CHAR  dat
 ```
 ## Compiler (In Progress)
-`lmc compile <infile.lmc> <outfile.lmasc>`\
+
+`lmc compile <infile.lmc> <outfile.lmasc>`
 
 ```rust
 fn mul(a, b) {
@@ -50,7 +51,7 @@ fn mul(a, b) {
     for (let i = 0; i < b; i = i + 1) {
         result = result + a;
     }
-    return reuslt;
+    return result;
 }
 
 fn main() {
