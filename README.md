@@ -1,12 +1,11 @@
 # README
 * useage : `cargo build -r` : 'targets/release' 
         * lmc emulate <file.bin>
-        * lmc assemble <file.lmc> <outfile.bin>
-        * lmc run <file.lmc> // assemble and run
+        * lmc assemble <file.lmasc> <outfile.bin>
+        * lmc run <file.lmasc> // assemble and run
 
 ```
 => each instruction is 3 bytes (1 byte opcode, and 2 bytes operannd)
-        => only 4 bits of operand in use
 
 opcode   operand
 xxxxxxxx yyyyyyyyyyyyyyyy
@@ -41,4 +40,23 @@ A     dat 65
 Z     dat 91
 ONE   dat 1
 CHAR  dat
+```
+## Compiler (In Progress)
+`lmc compile <infile.lmc> <outfile.lmasc>`
+
+```rust
+fn mul(a, b) {
+    let result;
+    for (let i = 0; i < b; i = i + 1) {
+        result = result + a;
+    }
+    return reuslt;
+}
+
+fn main() {
+    let a = input();
+    let b = input();
+    let result = mul(a, b);
+    print(result);
+}
 ```
