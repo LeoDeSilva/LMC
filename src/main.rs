@@ -55,7 +55,8 @@ fn compile(program: String) -> String {
     let tokens = l.lex();
 
     let mut p = compiler::parser::Parser::new(tokens);
-    p.parse();
+    let ast = p.parse();
+    println!("{:?}", ast);
 
     String::new()
 }
