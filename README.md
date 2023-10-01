@@ -1,8 +1,11 @@
 # README
-* useage : `cargo build -r` : 'targets/release' 
+
+* useage : `cargo build -r` : 'targets/release'
         * lmc emulate <file.bin>
         * lmc assemble <file.lmasc> <outfile.bin>
         * lmc run <file.lmasc> // assemble and run
+
+(alternatively run with `cargo run <args>`)
 
 ```
 => each instruction is 3 bytes (1 byte opcode, and 2 bytes operannd)
