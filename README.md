@@ -41,8 +41,8 @@ Z     dat 91
 ONE   dat 1
 CHAR  dat
 ```
-## Compiler (In Progress)
-`lmc compile <infile.lmc> <outfile.lmasc>`
+## Compiler (In Progress)
+`lmc compile <infile.lmc> <outfile.lmasc>`\
 
 ```rust
 fn mul(a, b) {
