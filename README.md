@@ -1,9 +1,9 @@
 # README
 
 * useage : `cargo build -r` : 'targets/release'
-        * lmc emulate <file.bin>
-        * lmc assemble <file.lmasc> <outfile.bin>
-        * lmc run <file.lmasc> // assemble and run
+* lmc `emulate <file.bin>`
+* `lmc assemble <file.lmasc> <outfile.bin>`
+* `lmc run <file.lmasc> // assemble and run`
 
 (alternatively run with `cargo run <args>`)
 
