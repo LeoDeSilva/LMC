@@ -1,9 +1,10 @@
 # README
 
 * useage : `cargo build -r` : lmc binary located in `targets/release`
-* `lmc emulate <file.bin>`
-* `lmc assemble <file.lmasc> <outfile.bin>`
-* `lmc run <file.lmasc> // assemble and run`
+* `lmc emulate <infile.bin>`
+* `lmc assemble <infile.lmasc> <outfile.bin>`
+* `lmc run <infile.lmasc> // assemble and run`
+* `lmc compile <infile.lmc> <outfile.lmasc>`
 
 (alternatively run with `cargo run <args>`)
 
