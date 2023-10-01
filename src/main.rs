@@ -53,7 +53,9 @@ fn assemble(path: std::path::PathBuf) -> Vec<u8> {
 fn compile(program: String) -> String {
     let mut l = compiler::lexer::Lexer::new(program.chars().collect());
     let tokens = l.lex();
-    println!("{:?}", tokens);
+
+    let mut p = compiler::parser::Parser::new(tokens);
+    p.parse();
 
     String::new()
 }

@@ -7,6 +7,7 @@ pub enum Token {
     Number(i32),
 
     SEMICOLON,
+    COMMA,
     EOF,
 
     ADD,
@@ -80,6 +81,7 @@ impl Lexer {
         let tok: Token;
 
         match self.ch {
+            ',' => { tok = Token::COMMA }
             '+' => { tok = Token::ADD }
             '-' => { tok = Token::SUB }
 
