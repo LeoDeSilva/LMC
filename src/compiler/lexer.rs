@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Token {
     Identifier(String),
     String(String),
@@ -23,8 +23,8 @@ pub enum Token {
     LT,
     LTE,
 
-    LBRACKET,
-    RBRACKET,
+    LPAREN,
+    RPAREN,
     LBRACE,
     RBRACE,
 
@@ -90,8 +90,8 @@ impl Lexer {
             '>' => { tok = self.lex_multichar(Token::GT, ('=', Token::GTE)) }
             '<' => { tok = self.lex_multichar(Token::LT, ('=', Token::LTE)) }
 
-            '(' => { tok = Token::LBRACKET }
-            ')' => { tok = Token::RBRACKET }
+            '(' => { tok = Token::LPAREN }
+            ')' => { tok = Token::RPAREN }
             '{' => { tok = Token::LBRACE }
             '}' => { tok = Token::RBRACE }
 
