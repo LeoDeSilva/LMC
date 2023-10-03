@@ -26,6 +26,10 @@ enum Subcommand {
         out: std::path::PathBuf,
     },
 
+    Semicompile {
+        path: std::path::PathBuf,
+    },
+
     Run {
         path: std::path::PathBuf,
     }
@@ -56,9 +60,9 @@ fn compile(program: String) -> String {
 
     let mut p = compiler::parser::Parser::new(tokens);
     let ast = p.parse();
-    println!("{:?}", ast);
 
-    String::new()
+    let mut c = compiler::compiler::Compiler::new();
+    c.compile(ast)
 }
 
 fn main () {
@@ -81,8 +85,21 @@ fn main () {
 
         Subcommand::Compile { path, out } => {
             let content = std::fs::read_to_string(path).expect("could not read file ");
-            println!("{}", out.display());
-            compile(content);
+            std::fs::write(out, compile(content)).unwrap();
+        }
+
+        Subcommand::Semicompile { path } => {
+            let content = std::fs::read_to_string(path).expect("could not read file ");
+            let mut l = assembler::lexer::Lexer::new(compile(content).chars().collect());
+            let tokens: Vec<assembler::lexer::Token> = l.lex();
+
+            let mut p = assembler::parser::Parser::new(tokens);
+            let (program, symbol_table) = p.parse();
+
+            let mut c = assembler::assembler::Compiler::new(program, symbol_table);
+            let program: Vec<u8> = c.compile();
+
+            emulate(program);
         }
     }
 }

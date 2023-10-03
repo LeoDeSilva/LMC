@@ -1,6 +1,6 @@
 use crate::compiler::lexer::Token;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Node {
     BLOCK(Box<Vec<Node>>),
     DECLARATION(Box<Node>, Box<Node>), // identifier, expression

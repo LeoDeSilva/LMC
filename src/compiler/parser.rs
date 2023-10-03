@@ -50,7 +50,6 @@ impl Parser {
         while self.token != Token::EOF {
             let statement = self.parse_statement();
             statements.push(statement);
-            println!("{:?}", self.token);
             self.eat_error(Token::SEMICOLON);
         }
 
