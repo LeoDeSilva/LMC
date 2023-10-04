@@ -1,0 +1,7 @@
+print       lda _p0
+            out
+            ret
+
+printc      lda _p0
+            otc
+            ret

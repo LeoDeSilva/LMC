@@ -1,0 +1,13 @@
+bra _main
+print       lda _p1
+            out
+            ret
+
+_main
+_p1 dat 0
+lda _10
+sta _p1
+
+call print
+
+_10 dat 10

@@ -1,1 +1,8 @@
-print(x, 1+2);
+use std;
+
+let x = 1;
+let y = 2;
+
+print(x);
+printc(43);
+print(y);

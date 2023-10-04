@@ -29,6 +29,7 @@ pub enum Token {
     RBRACE,
 
     LET,
+    USE,
 }
 
 
@@ -130,7 +131,8 @@ impl Lexer {
 
     fn lex_identifier(&mut self) -> Token {
         let keywords: HashMap<String, Token> = [
-            (String::from("let"), Token::LET)
+            ("let".to_string(), Token::LET),
+            ("use".to_string(), Token::USE),
         ].iter().cloned().collect();
 
         let position: usize = self.position;
@@ -200,11 +202,13 @@ mod tests {
 
     #[test]
     fn test_lex_identifier() {
-        let mut l = Lexer::new(String::from("x y is_str").chars().collect());
+        let mut l = Lexer::new(String::from("x y is_str let use").chars().collect());
         assert_eq!(l.lex(), vec![
             Token::Identifier(String::from("x")),
             Token::Identifier(String::from("y")),
             Token::Identifier(String::from("is_str")),
+            Token::LET,
+            Token::USE,
             Token::EOF,
         ])
     }

@@ -6,11 +6,15 @@ use crate::compiler::lexer::Token;
 pub struct Compiler {
     constants: HashMap<i32, String>,
     variables: HashMap<String, String>,
+    libraries: HashMap<String, std::path::PathBuf>
 }
 
 impl Compiler {
     pub fn new() -> Self {
-        Compiler { constants: HashMap::new(), variables: HashMap::new(), }
+        let libraries: HashMap<String, std::path::PathBuf> = [
+            ("std".to_string(), std::path::PathBuf::from("src/compiler/linker/std.lmasc"))
+        ].iter().cloned().collect();
+        Compiler { constants: HashMap::new(), variables: HashMap::new(), libraries: libraries }
     }
 
     pub fn compile(&mut self, ast: Node) -> String {
@@ -19,7 +23,7 @@ impl Compiler {
             out = out + &format!("{label} dat {value}\n");
         }
         println!("{}", out);
-        out
+        "bra _main\n".to_owned() + &out //TODO: Implement _main through a function
     }
 
     fn compile_node(&mut self, node: Node) -> String {
@@ -27,6 +31,8 @@ impl Compiler {
             Node::BLOCK(statements) => { self.compile_block(*statements) }
             Node::DECLARATION(identifier, expression) => { self.compile_declaration(*identifier, *expression) }
             Node::INFIX(lhs, op, rhs) => { self.compile_infix(*lhs, op, *rhs) }
+            Node::INVOCATION(id, args) => { self.compile_invocation(*id, *args) }
+            Node::LIBRARY(library) => { self.compile_library(*library) }
 
             Node::NUMBER(value) => { "lda ".to_owned() + &self.compile_number_literal(value) },
             Node::IDENTIFIER(identifier) => { "lda ".to_owned() + &self.compile_identifier_literal(identifier) },
@@ -80,6 +86,31 @@ impl Compiler {
         }
 
         identifier
+    }
+
+    fn compile_library(&mut self, library_node: Node) -> String {
+        let library = if let Node::IDENTIFIER(lib) = &library_node { lib } else { panic!("Parser error, expected identifier type: IDENTIFIER, got: {:?}", library_node) };
+        let lib_path = self.libraries.get(library).expect(&format!("No library exists with name: {}", library));
+        let lib_content = std::fs::read_to_string(lib_path).expect("could not read library");
+        lib_content + "\n" + "_main\n" //TODO: REMOVE _main
+    }
+
+    fn compile_invocation(&mut self, id_node: Node, args: Vec<Node>) -> String {
+        let identifier = if let Node::IDENTIFIER(identifier) = &id_node { identifier } else { panic!("Could not extract identifier from intialisation line") };
+        
+        let mut arg_counter = 0;
+        let mut arg_out: String = String::new();
+        for arg in args {
+            let arg_id = "_p".to_owned() + &arg_counter.to_string();
+            arg_out.push_str(&self.compile_node(Node::DECLARATION(
+                Box::new(Node::IDENTIFIER(arg_id)), 
+                Box::new(arg),
+            )));
+
+            arg_counter += 1;
+        }
+
+        format!("{arg_out}call {identifier}\n")
     }
 }
 

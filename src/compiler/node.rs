@@ -6,6 +6,7 @@ pub enum Node {
     DECLARATION(Box<Node>, Box<Node>), // identifier, expression
     INFIX(Box<Node>, Token, Box<Node>),
     INVOCATION(Box<Node>, Box<Vec<Node>>),
+    LIBRARY(Box<Node>),
 
     IDENTIFIER(String),
     NUMBER(i32),

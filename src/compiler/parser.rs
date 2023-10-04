@@ -53,13 +53,13 @@ impl Parser {
             self.eat_error(Token::SEMICOLON);
         }
 
-        println!("{:?}", statements);
         Node::BLOCK(Box::new(statements))
     }
 
     fn parse_statement(&mut self) -> Node {
         match self.token {
             Token::LET => { self.parse_declaration() }
+            Token::USE => { self.parse_use() }
             _ => { self.parse_expression(0) }
             // _ => { panic!("Invalid Token: {:?} to begin a statement", self.token) }
         }
@@ -130,6 +130,15 @@ impl Parser {
         }
 
         node
+    }
+
+    fn parse_use(&mut self) -> Node {
+        self.peek_error(Token::Identifier(String::from("")));
+        let identifier_str = if let Token::Identifier(identifier) = &self.token { identifier } else { panic!("DECLARATION, expected type IDENTIFIER following LET, got: {:?}", self.token) };
+        let identifier: Node = Node::IDENTIFIER(identifier_str.clone());
+        self.eat();
+
+        Node::LIBRARY(Box::new(identifier))
     }
 
     fn parse_invocation(&mut self, identifier: String) -> Node {
@@ -273,6 +282,20 @@ mod tests {
                     Box::new(Node::NUMBER(2)),
                 )),
             )
+        ])))
+    }
+
+    #[test]
+    fn test_parse_use() {
+        let mut p = Parser::new(vec![
+            Token::USE,
+            Token::Identifier(String::from("std")),
+            Token::SEMICOLON,
+            Token::EOF,
+        ]);
+
+        assert_eq!(p.parse(), Node::BLOCK(Box::new(vec![
+            Node::LIBRARY(Box::new(Node::IDENTIFIER("std".to_string())))
         ])))
     }
 
