@@ -52,6 +52,8 @@ CHAR  dat
 Compiles `.lmc` source code into `.lmasc` assembly.
 
 ```rust
+use std;
+
 fn mul(a, b) {
     let result;
     for (let i = 0; i < b; i = i + 1) {
