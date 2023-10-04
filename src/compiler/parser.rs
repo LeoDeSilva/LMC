@@ -53,6 +53,7 @@ impl Parser {
             self.eat_error(Token::SEMICOLON);
         }
 
+        println!("{:?}", statements);
         Node::BLOCK(Box::new(statements))
     }
 
@@ -92,6 +93,7 @@ impl Parser {
             peek_rbp = self.get_preference(self.token.clone());
         }
 
+
         lhs
     }
 
@@ -115,7 +117,9 @@ impl Parser {
         match &self.token {
             Token::Number(value) => { node = Node::NUMBER(value.clone()); }
             Token::String(value) => { node = Node::STRING(value.clone()); }
-            Token::Identifier(id) => { node = Node::IDENTIFIER(id.clone()); }
+            Token::Identifier(id) => { 
+                node = if self.next_token == Token::LPAREN { self.parse_invocation(id.clone()) } else { Node::IDENTIFIER(id.clone()) };  
+            }
             Token::LPAREN => {
                 self.eat();
                 node = self.parse_expression(0);
@@ -126,6 +130,29 @@ impl Parser {
         }
 
         node
+    }
+
+    fn parse_invocation(&mut self, identifier: String) -> Node {
+        self.eat();
+
+        let mut args: Vec<Node> = vec![];
+
+        self.eat();
+        while self.token != Token::RPAREN && self.token != Token::EOF {
+            let expr = self.parse_expression(0);
+            args.push(expr);
+
+            if self.token != Token::RPAREN && self.token != Token::COMMA {
+                panic!("SyntaxError: expected '(' or ',' following function parameter, got: {:?}", self.token);
+            }
+
+            if self.token == Token::COMMA { self.eat(); }
+        }
+
+        Node::INVOCATION(
+            Box::new(Node::IDENTIFIER(identifier)), 
+            Box::new(args)
+        )
     }
 
     fn get_preference(&self, t: Token) -> i32 {
@@ -155,6 +182,63 @@ impl Parser {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_parse_invocation() {
+        let mut p = Parser::new(vec![
+            Token::Identifier("print".to_string()),
+            Token::LPAREN,
+            Token::Identifier("x".to_string()),
+            Token::RPAREN,
+            Token::SEMICOLON,
+
+            Token::Identifier("print".to_string()),
+            Token::LPAREN,
+            Token::Number(10),
+            Token::COMMA,
+            Token::Number(3),
+            Token::RPAREN,
+            Token::SEMICOLON,
+
+            Token::Identifier("print".to_string()),
+            Token::LPAREN,
+            Token::Identifier("x".to_string()),
+            Token::ADD,
+            Token::Number(5),
+            Token::RPAREN,
+            Token::SEMICOLON,
+
+            Token::EOF,
+        ]);
+
+        assert_eq!(p.parse(), Node::BLOCK(Box::new(vec![
+            Node::INVOCATION(
+                Box::new(Node::IDENTIFIER("print".to_string())), 
+                Box::new(vec![
+                    Node::IDENTIFIER("x".to_string())
+                ])
+            ),
+
+            Node::INVOCATION(
+                Box::new(Node::IDENTIFIER("print".to_string())), 
+                Box::new(vec![
+                    Node::NUMBER(10),
+                    Node::NUMBER(3),
+                ])
+            ),
+
+            Node::INVOCATION(
+                Box::new(Node::IDENTIFIER("print".to_string())), 
+                Box::new(vec![
+                    Node::INFIX(
+                        Box::new(Node::IDENTIFIER("x".to_string())), 
+                        Token::ADD,
+                        Box::new(Node::NUMBER(5)),
+                    )
+                ])
+            ),
+        ])))
+    }
 
     #[test]
     fn test_parse_declaration() {

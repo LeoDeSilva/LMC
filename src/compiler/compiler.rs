@@ -5,11 +5,12 @@ use crate::compiler::lexer::Token;
 
 pub struct Compiler {
     constants: HashMap<i32, String>,
+    variables: HashMap<String, String>,
 }
 
 impl Compiler {
     pub fn new() -> Self {
-        Compiler { constants: HashMap::new() }
+        Compiler { constants: HashMap::new(), variables: HashMap::new(), }
     }
 
     pub fn compile(&mut self, ast: Node) -> String {
@@ -53,6 +54,7 @@ impl Compiler {
     fn compile_declaration(&mut self, identifier_node: Node, expression_node: Node) -> String {
         let identifier = if let Node::IDENTIFIER(identifier) = &identifier_node { identifier } else { panic!("Parser error, expected identifier type: IDENTIFIER, got: {:?}", identifier_node) };
         let expression = self.compile_node(expression_node);
+        self.variables.insert(identifier.clone(), identifier.clone());
         format!("{identifier} dat 0\n{expression}\nsta {identifier}\n")
 
     }
@@ -73,7 +75,10 @@ impl Compiler {
     }
 
     fn compile_identifier_literal(&mut self, identifier: String) -> String {
-        //TODO CHECK identifier exists and is initialised
+        if !self.variables.contains_key(&identifier) {
+            panic!("Cannot reference uninitialised variable: {}", identifier);
+        }
+
         identifier
     }
 }
