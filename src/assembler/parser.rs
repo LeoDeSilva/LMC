@@ -108,7 +108,7 @@ impl Parser {
                 lexer::Token::Number(0) 
             },
 
-            _ => { panic!("Unexpected token found in parse_operand(): {:?}", self.tok)}
+            _ => { panic!("unexpected token in operand, got: {:?}", self.peek()) }
         }
     }
 }

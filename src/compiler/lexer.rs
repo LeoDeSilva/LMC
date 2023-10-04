@@ -29,7 +29,9 @@ pub enum Token {
     RBRACE,
 
     LET,
+    FN,
     USE,
+    RETURN,
 }
 
 
@@ -133,6 +135,8 @@ impl Lexer {
         let keywords: HashMap<String, Token> = [
             ("let".to_string(), Token::LET),
             ("use".to_string(), Token::USE),
+            ("fn".to_string(), Token::FN),
+            ("return".to_string(), Token::RETURN),
         ].iter().cloned().collect();
 
         let position: usize = self.position;

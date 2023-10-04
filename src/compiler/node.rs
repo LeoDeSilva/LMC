@@ -3,10 +3,12 @@ use crate::compiler::lexer::Token;
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node {
     BLOCK(Box<Vec<Node>>),
-    DECLARATION(Box<Node>, Box<Node>), // identifier, expression
+    DECLARATION(String, Box<Node>), // identifier, expression
     INFIX(Box<Node>, Token, Box<Node>),
-    INVOCATION(Box<Node>, Box<Vec<Node>>),
-    LIBRARY(Box<Node>),
+    INVOCATION(String, Box<Vec<Node>>),
+    LIBRARY(String),
+    FUNCTION(String, Vec<String>, Box<Node>),
+    RETURN(Box<Node>),
 
     IDENTIFIER(String),
     NUMBER(i32),

@@ -49,8 +49,12 @@ impl Parser {
 
         while self.token != Token::EOF {
             let statement = self.parse_statement();
+            match statement {
+                Node::FUNCTION(_, _, _) => {}
+                _ => { self.eat_error(Token::SEMICOLON) } 
+            }
+
             statements.push(statement);
-            self.eat_error(Token::SEMICOLON);
         }
 
         Node::BLOCK(Box::new(statements))
@@ -60,6 +64,8 @@ impl Parser {
         match self.token {
             Token::LET => { self.parse_declaration() }
             Token::USE => { self.parse_use() }
+            Token::FN  => { self.parse_function() }
+            Token::RETURN => { self.parse_return() }
             _ => { self.parse_expression(0) }
             // _ => { panic!("Invalid Token: {:?} to begin a statement", self.token) }
         }
@@ -68,8 +74,13 @@ impl Parser {
     fn parse_declaration(&mut self) -> Node {
         self.peek_error(Token::Identifier(String::from("")));
 
-        let identifier_str = if let Token::Identifier(identifier) = &self.token { identifier } else { panic!("DECLARATION, expected type IDENTIFIER following LET, got: {:?}", self.token) };
-        let identifier: Node = Node::IDENTIFIER(identifier_str.clone());
+        // let identifier_str = if let Token::Identifier(identifier) = &self.token { identifier } else { panic!("DECLARATION, expected type IDENTIFIER following LET, got: {:?}", self.token) };
+        let identifier_str = if let Token::Identifier(id) = self.token.clone() { id } else { panic!("") };
+
+        if self.next_token == Token::SEMICOLON {
+            self.eat();
+            return Node::DECLARATION(identifier_str.clone(), Box::new(Node::NUMBER(0)));
+        }
 
         self.peek_error(Token::EQ);
         self.eat(); // positing to expression
@@ -77,7 +88,7 @@ impl Parser {
         let expression = self.parse_expression(0);
 
         Node::DECLARATION(
-            Box::new(identifier),
+            identifier_str.clone(),
             Box::new(expression),
         )
     }
@@ -134,11 +145,10 @@ impl Parser {
 
     fn parse_use(&mut self) -> Node {
         self.peek_error(Token::Identifier(String::from("")));
-        let identifier_str = if let Token::Identifier(identifier) = &self.token { identifier } else { panic!("DECLARATION, expected type IDENTIFIER following LET, got: {:?}", self.token) };
-        let identifier: Node = Node::IDENTIFIER(identifier_str.clone());
+        let identifier_str = if let Token::Identifier(identifier) = self.token.clone() { identifier } else { panic!("DECLARATION, expected type IDENTIFIER following LET, got: {:?}", self.token) };
         self.eat();
 
-        Node::LIBRARY(Box::new(identifier))
+        Node::LIBRARY(identifier_str.clone())
     }
 
     fn parse_invocation(&mut self, identifier: String) -> Node {
@@ -159,9 +169,62 @@ impl Parser {
         }
 
         Node::INVOCATION(
-            Box::new(Node::IDENTIFIER(identifier)), 
+            identifier, 
             Box::new(args)
         )
+    }
+
+    fn parse_return(&mut self) -> Node {
+        self.eat();
+        let mut expression = Node::NUMBER(0);
+        if self.token != Token::SEMICOLON {
+            expression = self.parse_expression(0);
+        }
+        Node::RETURN(Box::new(expression))
+    }
+
+    fn parse_function(&mut self) -> Node {
+        self.peek_error(Token::Identifier("".to_string()));
+        let identifier: String = if let Token::Identifier(id) = self.token.clone() { id } else { panic!("could not extract identifier from token FUNCTION") };
+
+        self.peek_error(Token::LPAREN);
+        self.eat();
+
+        let mut args: Vec<String> = vec![];
+        while self.token != Token::EOF &&  self.token != Token::RPAREN {
+            let arg: String = if let Token::Identifier(id) = self.token.clone() { id } else { panic!("could not extract identifier from token FUNCTION") };
+            self.eat();
+
+            if self.token != Token::COMMA && self.token != Token::RPAREN {
+                panic!("Unexpected token encountered when parsing arguments, expected ',' or ')', got: {:?}", self.token);
+            }
+            
+            if self.token == Token::COMMA { self.eat(); }
+            args.push(arg);
+        }
+
+        self.peek_error(Token::LBRACE);
+        self.eat();
+        let block = self.parse_block();
+        self.eat();
+
+        Node::FUNCTION(identifier, args, Box::new(block))
+    }
+
+    fn parse_block(&mut self) -> Node {
+        let mut statements = vec![];
+
+        while self.token != Token::EOF && self.token != Token::RBRACE {
+            let statement = self.parse_statement();
+            match statement {
+                Node::FUNCTION(_, _, _) => {}
+                _ => { self.eat_error(Token::SEMICOLON) } 
+            }
+
+            statements.push(statement);
+        }
+
+        Node::BLOCK(Box::new(statements))
     }
 
     fn get_preference(&self, t: Token) -> i32 {
@@ -222,14 +285,14 @@ mod tests {
 
         assert_eq!(p.parse(), Node::BLOCK(Box::new(vec![
             Node::INVOCATION(
-                Box::new(Node::IDENTIFIER("print".to_string())), 
+                "print".to_string(), 
                 Box::new(vec![
                     Node::IDENTIFIER("x".to_string())
                 ])
             ),
 
             Node::INVOCATION(
-                Box::new(Node::IDENTIFIER("print".to_string())), 
+                "print".to_string(), 
                 Box::new(vec![
                     Node::NUMBER(10),
                     Node::NUMBER(3),
@@ -237,7 +300,7 @@ mod tests {
             ),
 
             Node::INVOCATION(
-                Box::new(Node::IDENTIFIER("print".to_string())), 
+                "print".to_string(), 
                 Box::new(vec![
                     Node::INFIX(
                         Box::new(Node::IDENTIFIER("x".to_string())), 
@@ -271,11 +334,11 @@ mod tests {
 
         assert_eq!(p.parse(), Node::BLOCK(Box::new(vec![
             Node::DECLARATION(
-                Box::new(Node::IDENTIFIER(String::from("x"))), 
+                String::from("x"), 
                 Box::new(Node::NUMBER(1)),
             ),
             Node::DECLARATION(
-                Box::new(Node::IDENTIFIER(String::from("y"))), 
+                String::from("y"), 
                 Box::new(Node::INFIX(
                     Box::new(Node::IDENTIFIER(String::from("x"))),
                     Token::ADD,
@@ -295,7 +358,7 @@ mod tests {
         ]);
 
         assert_eq!(p.parse(), Node::BLOCK(Box::new(vec![
-            Node::LIBRARY(Box::new(Node::IDENTIFIER("std".to_string())))
+            Node::LIBRARY("std".to_string())
         ])))
     }
 
@@ -342,7 +405,7 @@ mod tests {
             ),
 
             Node::DECLARATION(
-                Box::new(Node::IDENTIFIER(String::from("a"))), 
+                String::from("a"), 
                 Box::new(Node::INFIX(
                     Box::new(Node::NUMBER(3)), 
                     Token::ADD,

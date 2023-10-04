@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use crate::compiler::node::Node;
 use crate::compiler::lexer::Token;
 
+//TODO: Implement .lmc std imports?
+
 pub struct Compiler {
     constants: HashMap<i32, String>,
     variables: HashMap<String, String>,
@@ -23,19 +25,21 @@ impl Compiler {
             out = out + &format!("{label} dat {value}\n");
         }
         println!("{}", out);
-        "bra _main\n".to_owned() + &out //TODO: Implement _main through a function
+        "_ret dat 0\nbra _main\n".to_owned() + &out //TODO: Implement _main through a function
     }
 
     fn compile_node(&mut self, node: Node) -> String {
         match node {
             Node::BLOCK(statements) => { self.compile_block(*statements) }
-            Node::DECLARATION(identifier, expression) => { self.compile_declaration(*identifier, *expression) }
+            Node::DECLARATION(identifier, expression) => { self.compile_declaration(identifier, *expression) }
             Node::INFIX(lhs, op, rhs) => { self.compile_infix(*lhs, op, *rhs) }
-            Node::INVOCATION(id, args) => { self.compile_invocation(*id, *args) }
-            Node::LIBRARY(library) => { self.compile_library(*library) }
+            Node::INVOCATION(id, args) => { self.compile_invocation(id, *args) }
+            Node::LIBRARY(library) => { self.compile_library(library) }
+            Node::FUNCTION(id, args, block) => { self.compile_function(id, args, *block) }
+            Node::RETURN(expression) => { self.compile_return(*expression) }
 
-            Node::NUMBER(value) => { "lda ".to_owned() + &self.compile_number_literal(value) },
-            Node::IDENTIFIER(identifier) => { "lda ".to_owned() + &self.compile_identifier_literal(identifier) },
+            Node::NUMBER(value) => { "lda ".to_owned() + &self.compile_number_literal(value) }
+            Node::IDENTIFIER(identifier) => { "lda ".to_owned() + &self.compile_identifier_literal(identifier) }
 
             _ => { panic!("Unexpected node found in compile_node(), got: {:?}", node)}
         }
@@ -44,6 +48,7 @@ impl Compiler {
    fn compile_atom(&mut self, atom: Node) -> String {
         match atom {
             Node::NUMBER(value) => { self.compile_number_literal(value) },
+            Node::IDENTIFIER(id) => { self.compile_identifier_literal(id) },
             _ => { panic!("Unexpected node found in compile_node(), got: {:?}", atom)}
         }
    }
@@ -57,8 +62,7 @@ impl Compiler {
         out
     }
 
-    fn compile_declaration(&mut self, identifier_node: Node, expression_node: Node) -> String {
-        let identifier = if let Node::IDENTIFIER(identifier) = &identifier_node { identifier } else { panic!("Parser error, expected identifier type: IDENTIFIER, got: {:?}", identifier_node) };
+    fn compile_declaration(&mut self, identifier: String, expression_node: Node) -> String {
         let expression = self.compile_node(expression_node);
         self.variables.insert(identifier.clone(), identifier.clone());
         format!("{identifier} dat 0\n{expression}\nsta {identifier}\n")
@@ -81,36 +85,59 @@ impl Compiler {
     }
 
     fn compile_identifier_literal(&mut self, identifier: String) -> String {
-        if !self.variables.contains_key(&identifier) {
-            panic!("Cannot reference uninitialised variable: {}", identifier);
-        }
+        // if !self.variables.contains_key(&identifier) {
+        //     panic!("Cannot reference uninitialised variable: {}", identifier);
+        // }
 
         identifier
     }
 
-    fn compile_library(&mut self, library_node: Node) -> String {
-        let library = if let Node::IDENTIFIER(lib) = &library_node { lib } else { panic!("Parser error, expected identifier type: IDENTIFIER, got: {:?}", library_node) };
-        let lib_path = self.libraries.get(library).expect(&format!("No library exists with name: {}", library));
+    fn compile_library(&mut self, library: String) -> String {
+        let lib_path = self.libraries.get(&library).expect(&format!("No library exists with name: {}", library));
         let lib_content = std::fs::read_to_string(lib_path).expect("could not read library");
-        lib_content + "\n" + "_main\n" //TODO: REMOVE _main
+        lib_content + "\n"
     }
 
-    fn compile_invocation(&mut self, id_node: Node, args: Vec<Node>) -> String {
-        let identifier = if let Node::IDENTIFIER(identifier) = &id_node { identifier } else { panic!("Could not extract identifier from intialisation line") };
-        
+    fn compile_invocation(&mut self, identifier: String, args: Vec<Node>) -> String {
         let mut arg_counter = 0;
         let mut arg_out: String = String::new();
         for arg in args {
             let arg_id = "_p".to_owned() + &arg_counter.to_string();
             arg_out.push_str(&self.compile_node(Node::DECLARATION(
-                Box::new(Node::IDENTIFIER(arg_id)), 
+                arg_id, 
                 Box::new(arg),
             )));
 
             arg_counter += 1;
         }
 
-        format!("{arg_out}call {identifier}\n")
+        format!("{arg_out}call {identifier}\nlda _ret\n")
+    }
+
+    fn compile_function(&mut self, identifier: String, args: Vec<String>, block: Node) -> String {
+        let mut args_out: String = String::new();
+        let mut arg_counter = 0;
+
+        for arg in args {
+            self.variables.insert(arg.clone(), arg.clone());
+            let arg_id = "_p".to_owned() + &arg_counter.to_string();
+
+            args_out.push_str(&self.compile_node(Node::DECLARATION(
+                arg, 
+                Box::new(Node::IDENTIFIER(arg_id))
+            )));
+
+            arg_counter += 1;
+        }
+        format!("{identifier}\n{args_out}\n{}", self.compile_node(block))
+    }
+
+    fn compile_return(&mut self, expression_node: Node) -> String {
+        let expr_out = self.compile_node(Node::DECLARATION(
+            "_ret".to_string(), 
+            Box::new(expression_node)
+        ));
+        format!("{expr_out}ret\n")
     }
 }
 
@@ -123,7 +150,7 @@ mod tests {
         let mut c = Compiler::new();
         assert_eq!(c.compile(Node::BLOCK(Box::new(vec![
             Node::DECLARATION(
-                Box::new(Node::IDENTIFIER(String::from("x"))), 
+                String::from("x"), 
                 Box::new(Node::NUMBER(1)),
             )]
         ))), 
@@ -137,7 +164,7 @@ mod tests {
         let mut c = Compiler::new();
         let out: String = c.compile(Node::BLOCK(Box::new(vec![
             Node::DECLARATION(
-                Box::new(Node::IDENTIFIER(String::from("x"))), 
+                String::from("x"), 
                 Box::new(Node::INFIX(
                     Box::new(Node::NUMBER(1)), 
                     Token::ADD, 
