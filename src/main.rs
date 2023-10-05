@@ -62,7 +62,9 @@ fn compile(program: String) -> String {
     let ast = p.parse();
 
     let mut c = compiler::compiler::Compiler::new();
-    c.compile(ast)
+    let out = c.compile(ast);
+    println!("{}", out);
+    out
 }
 
 fn main () {

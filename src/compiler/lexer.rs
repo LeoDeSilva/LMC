@@ -33,6 +33,9 @@ pub enum Token {
     USE,
     RETURN,
     HALT,
+    IF,
+    ELIF,
+    ELSE,
 }
 
 
@@ -139,6 +142,9 @@ impl Lexer {
             ("fn".to_string(), Token::FN),
             ("return".to_string(), Token::RETURN),
             ("halt".to_string(), Token::HALT),
+            ("if".to_string(), Token::IF),
+            ("elif".to_string(), Token::ELIF),
+            ("else".to_string(), Token::ELSE),
         ].iter().cloned().collect();
 
         let position: usize = self.position;
@@ -208,13 +214,16 @@ mod tests {
 
     #[test]
     fn test_lex_identifier() {
-        let mut l = Lexer::new(String::from("x y is_str let use").chars().collect());
+        let mut l = Lexer::new(String::from("x y is_str let use if elif else").chars().collect());
         assert_eq!(l.lex(), vec![
             Token::Identifier(String::from("x")),
             Token::Identifier(String::from("y")),
             Token::Identifier(String::from("is_str")),
             Token::LET,
             Token::USE,
+            Token::IF,
+            Token::ELIF,
+            Token::ELSE,
             Token::EOF,
         ])
     }

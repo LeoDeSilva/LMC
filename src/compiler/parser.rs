@@ -51,6 +51,7 @@ impl Parser {
             let statement = self.parse_statement();
             match statement {
                 Node::FUNCTION(_, _, _) => {}
+                Node::IF(_, _) => {}
                 _ => { self.eat_error(Token::SEMICOLON) } 
             }
 
@@ -66,6 +67,7 @@ impl Parser {
             Token::USE => { self.parse_use() }
             Token::FN  => { self.parse_function() }
             Token::RETURN => { self.parse_return() }
+            Token::IF => { self.parse_if() }
             Token::Identifier(id) =>  { 
                 if self.next_token == Token::EQ {
                     self.parse_assignment(id.clone())
@@ -246,6 +248,7 @@ impl Parser {
             let statement = self.parse_statement();
             match statement {
                 Node::FUNCTION(_, _, _) => {}
+                Node::IF(_, _) => {}
                 _ => { self.eat_error(Token::SEMICOLON) } 
             }
 
@@ -253,6 +256,32 @@ impl Parser {
         }
 
         Node::BLOCK(Box::new(statements))
+    }
+
+
+    fn parse_if(&mut self) -> Node {
+        let mut conditionals: Vec<Node> = vec![];
+
+        while self.token == Token::IF || self.token == Token::ELIF {
+            self.eat();
+
+            let condition = self.parse_expression(0);
+            self.eat_error(Token::LBRACE);
+            let consequence = self.parse_block();
+            self.eat_error(Token::RBRACE);
+
+            conditionals.push(Node::CONDITIONAL(Box::new(condition), Box::new(consequence)));
+        }
+
+        let mut else_block = Node::BLOCK(Box::new(vec![]));
+        if self.token == Token::ELSE {
+            self.peek_error(Token::LBRACE); 
+            self.eat();
+            else_block = self.parse_block();
+            self.eat_error(Token::RBRACE);
+        }
+
+        Node::IF(Box::new(conditionals), Box::new(else_block))
     }
 
 

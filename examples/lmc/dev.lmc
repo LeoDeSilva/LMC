@@ -5,11 +5,18 @@ fn double(x) {
 }
 
 fn _main() {
-    let x = 10;
-    x = 2;
-    
-    let y = double(x);
-    print(y+2);
+    let score = input();
+    let grade;
+
+    if score > 50 {
+        grade = 66;
+    } elif score > 75 {
+        grade = 65;
+    } else {
+        grade = 67;
+    }
+
+    printc(grade);
 
     return 0;
 }

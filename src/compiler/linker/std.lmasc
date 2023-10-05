@@ -5,3 +5,7 @@ print       lda _p0
 printc      lda _p0
             otc
             ret
+
+input       inp
+            sta _ret
+            ret
