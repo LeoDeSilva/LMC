@@ -61,36 +61,25 @@ impl Parser {
     }
 
     fn parse_statement(&mut self) -> Node {
-        match self.token {
+        match &self.token {
             Token::LET => { self.parse_declaration() }
             Token::USE => { self.parse_use() }
             Token::FN  => { self.parse_function() }
             Token::RETURN => { self.parse_return() }
+            Token::Identifier(id) =>  { 
+                if self.next_token == Token::EQ {
+                    self.parse_assignment(id.clone())
+                } else {
+                    self.parse_expression(0)
+                }
+            }
+            Token::HALT => { 
+                self.eat();
+                Node::HALT()
+             }
             _ => { self.parse_expression(0) }
             // _ => { panic!("Invalid Token: {:?} to begin a statement", self.token) }
         }
-    }
-
-    fn parse_declaration(&mut self) -> Node {
-        self.peek_error(Token::Identifier(String::from("")));
-
-        // let identifier_str = if let Token::Identifier(identifier) = &self.token { identifier } else { panic!("DECLARATION, expected type IDENTIFIER following LET, got: {:?}", self.token) };
-        let identifier_str = if let Token::Identifier(id) = self.token.clone() { id } else { panic!("") };
-
-        if self.next_token == Token::SEMICOLON {
-            self.eat();
-            return Node::DECLARATION(identifier_str.clone(), Box::new(Node::NUMBER(0)));
-        }
-
-        self.peek_error(Token::EQ);
-        self.eat(); // positing to expression
-
-        let expression = self.parse_expression(0);
-
-        Node::DECLARATION(
-            identifier_str.clone(),
-            Box::new(expression),
-        )
     }
 
     fn parse_expression(&mut self, rbp: i32) -> Node {
@@ -103,7 +92,6 @@ impl Parser {
             lhs = self.parse_infix(lhs, self.token.clone());
             peek_rbp = self.get_preference(self.token.clone());
         }
-
 
         lhs
     }
@@ -123,13 +111,17 @@ impl Parser {
         )
     }
 
+
     fn parse_atom(&mut self) -> Node {
         let node: Node;
         match &self.token {
             Token::Number(value) => { node = Node::NUMBER(value.clone()); }
             Token::String(value) => { node = Node::STRING(value.clone()); }
             Token::Identifier(id) => { 
-                node = if self.next_token == Token::LPAREN { self.parse_invocation(id.clone()) } else { Node::IDENTIFIER(id.clone()) };  
+                match self.next_token {
+                    Token::LPAREN => { node = self.parse_invocation(id.clone()) } 
+                    _ => { node = Node::IDENTIFIER(id.clone())}
+                }
             }
             Token::LPAREN => {
                 self.eat();
@@ -143,6 +135,7 @@ impl Parser {
         node
     }
 
+
     fn parse_use(&mut self) -> Node {
         self.peek_error(Token::Identifier(String::from("")));
         let identifier_str = if let Token::Identifier(identifier) = self.token.clone() { identifier } else { panic!("DECLARATION, expected type IDENTIFIER following LET, got: {:?}", self.token) };
@@ -150,6 +143,7 @@ impl Parser {
 
         Node::LIBRARY(identifier_str.clone())
     }
+
 
     fn parse_invocation(&mut self, identifier: String) -> Node {
         self.eat();
@@ -174,6 +168,7 @@ impl Parser {
         )
     }
 
+
     fn parse_return(&mut self) -> Node {
         self.eat();
         let mut expression = Node::NUMBER(0);
@@ -182,6 +177,38 @@ impl Parser {
         }
         Node::RETURN(Box::new(expression))
     }
+
+
+    fn parse_declaration(&mut self) -> Node {
+        self.peek_error(Token::Identifier(String::from("")));
+
+        // let identifier_str = if let Token::Identifier(identifier) = &self.token { identifier } else { panic!("DECLARATION, expected type IDENTIFIER following LET, got: {:?}", self.token) };
+        let identifier_str = if let Token::Identifier(id) = self.token.clone() { id } else { panic!("") };
+
+        if self.next_token == Token::SEMICOLON {
+            self.eat();
+            return Node::DECLARATION(identifier_str.clone(), Box::new(Node::NUMBER(0)));
+        }
+
+        self.peek_error(Token::EQ);
+        self.eat(); // positing to expression
+
+        let expression = self.parse_expression(0);
+
+        Node::DECLARATION(
+            identifier_str.clone(),
+            Box::new(expression),
+        )
+    }
+
+    fn parse_assignment(&mut self, identifier: String) -> Node {
+        self.eat();
+        self.eat_error(Token::EQ);
+        let expr = self.parse_expression(0);
+
+        Node::ASSIGNMENT(identifier, Box::new(expr))
+    }
+
 
     fn parse_function(&mut self) -> Node {
         self.peek_error(Token::Identifier("".to_string()));
@@ -211,6 +238,7 @@ impl Parser {
         Node::FUNCTION(identifier, args, Box::new(block))
     }
 
+
     fn parse_block(&mut self) -> Node {
         let mut statements = vec![];
 
@@ -226,6 +254,7 @@ impl Parser {
 
         Node::BLOCK(Box::new(statements))
     }
+
 
     fn get_preference(&self, t: Token) -> i32 {
         let preferences: HashMap<Token, i32> = [

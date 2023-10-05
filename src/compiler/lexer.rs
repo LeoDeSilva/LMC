@@ -32,6 +32,7 @@ pub enum Token {
     FN,
     USE,
     RETURN,
+    HALT,
 }
 
 
@@ -137,6 +138,7 @@ impl Lexer {
             ("use".to_string(), Token::USE),
             ("fn".to_string(), Token::FN),
             ("return".to_string(), Token::RETURN),
+            ("halt".to_string(), Token::HALT),
         ].iter().cloned().collect();
 
         let position: usize = self.position;

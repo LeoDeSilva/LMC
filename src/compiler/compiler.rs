@@ -4,6 +4,7 @@ use crate::compiler::node::Node;
 use crate::compiler::lexer::Token;
 
 //TODO: Implement .lmc std imports?
+//TODO: return 0; from _main
 
 pub struct Compiler {
     constants: HashMap<i32, String>,
@@ -25,18 +26,20 @@ impl Compiler {
             out = out + &format!("{label} dat {value}\n");
         }
         println!("{}", out);
-        "_ret dat 0\nbra _main\n".to_owned() + &out //TODO: Implement _main through a function
+        "_ret dat 0\ncall _main\nhlt\n".to_owned() + &out //TODO: Implement _main through a function
     }
 
     fn compile_node(&mut self, node: Node) -> String {
         match node {
             Node::BLOCK(statements) => { self.compile_block(*statements) }
             Node::DECLARATION(identifier, expression) => { self.compile_declaration(identifier, *expression) }
+            Node::ASSIGNMENT(identifier, expression) => { self.compile_assignment(identifier, *expression) }
             Node::INFIX(lhs, op, rhs) => { self.compile_infix(*lhs, op, *rhs) }
             Node::INVOCATION(id, args) => { self.compile_invocation(id, *args) }
             Node::LIBRARY(library) => { self.compile_library(library) }
             Node::FUNCTION(id, args, block) => { self.compile_function(id, args, *block) }
             Node::RETURN(expression) => { self.compile_return(*expression) }
+            Node::HALT() => { "hlt\n".to_string() }
 
             Node::NUMBER(value) => { "lda ".to_owned() + &self.compile_number_literal(value) }
             Node::IDENTIFIER(identifier) => { "lda ".to_owned() + &self.compile_identifier_literal(identifier) }
@@ -66,7 +69,11 @@ impl Compiler {
         let expression = self.compile_node(expression_node);
         self.variables.insert(identifier.clone(), identifier.clone());
         format!("{identifier} dat 0\n{expression}\nsta {identifier}\n")
-
+    }
+    
+    fn compile_assignment(&mut self, identifier: String, expression_node: Node) -> String {
+        let expression = self.compile_node(expression_node);
+        format!("{expression}\nsta {identifier}\n")
     }
 
     fn compile_infix(&mut self, lhs_node: Node, op_tok: Token, rhs_node: Node) -> String {
@@ -129,7 +136,8 @@ impl Compiler {
 
             arg_counter += 1;
         }
-        format!("{identifier}\n{args_out}\n{}", self.compile_node(block))
+
+        format!("{identifier}\n{args_out}\n{}ret\n", self.compile_node(block))
     }
 
     fn compile_return(&mut self, expression_node: Node) -> String {

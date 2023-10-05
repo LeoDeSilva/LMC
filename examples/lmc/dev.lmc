@@ -1,11 +1,15 @@
 use std;
 
-fn add_values(a, b) {
-    return a + b;
+fn double(x) {
+    return x+x;
 }
 
 fn _main() {
-    let x = 1;
-    let y = x + 2;
-    print(add_values(x,y));
+    let x = 10;
+    x = 2;
+    
+    let y = double(x);
+    print(y+2);
+
+    return 0;
 }
