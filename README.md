@@ -54,6 +54,116 @@ Compiles `.lmc` source code into `.lmasc` assembly.
 ```rust
 use std;
 
+fn get_grade(score) {
+    let grade;
+    
+    if score >= 75 {
+        grade = 65;
+    } elif score >= 50 {
+        grade = 66;
+    } else {
+        grade = 67;
+    }
+
+    return grade;
+}
+
+fn _main() {
+    let score = input(); 
+    printc(get_grade(score));
+    return 0;
+}
+```
+
+will compile to
+
+```x86
+call _main
+hlt
+
+print       lda _p0
+            out
+            ret
+
+printc      lda _p0
+            otc
+            ret
+
+input       inp
+            sta _ret
+            ret
+get_grade
+      score dat 0
+      lda _p0
+      sta score
+
+      grade dat 0
+      lda _0
+      sta grade
+
+      lda score
+      SUB _75
+      bgt _l1
+      brz _l1
+
+      lda score
+      SUB _50
+      bgt _l2
+      brz _l2
+
+      lda _67
+      sta grade
+      bra _l0
+
+      _l1
+            lda _65
+            sta grade
+            bra _l0
+      _l2
+            lda _66
+            sta grade
+            bra _l0
+      _l0
+
+      _ret dat 0
+      lda grade
+      sta _ret
+
+      ret
+
+_main
+      score dat 0
+      call input
+      lda _ret
+      sta score
+
+      _p0 dat 0
+      lda score
+      sta _p0
+
+      call get_grade
+      lda _ret
+      sta _p0
+
+      call printc
+      lda _ret
+
+      _ret dat 0
+      lda _0
+      sta _ret
+      ret
+
+_66 dat 66
+_67 dat 67
+_50 dat 50
+_0 dat 0
+_75 dat 75
+_65 dat 65
+```
+
+```rust
+use std;
+
 fn mul(a, b) {
     let result;
     for (let i = 0; i < b; i = i + 1) {
