@@ -45,7 +45,7 @@ Z     dat 91
 ONE   dat 1
 CHAR  dat
 ```
-## Compiler (In Progress)
+## Compiler 
 
 `lmc compile <infile.lmc> <outfile.lmasc>`
 
