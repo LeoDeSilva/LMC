@@ -29,6 +29,7 @@ pub enum Token {
     RBRACE,
 
     LET,
+    WHILE,
     FN,
     USE,
     RETURN,
@@ -145,6 +146,7 @@ impl Lexer {
             ("if".to_string(), Token::IF),
             ("elif".to_string(), Token::ELIF),
             ("else".to_string(), Token::ELSE),
+            ("while".to_string(), Token::WHILE),
         ].iter().cloned().collect();
 
         let position: usize = self.position;

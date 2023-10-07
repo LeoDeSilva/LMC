@@ -67,7 +67,7 @@ impl Compiler {
             lexer::Token::Number(value) => { return value }
             lexer::Token::Label(identifier) => {
                 // Lookup, *3, u16
-                let address = self.symbol_table.get(&identifier).expect("undefined label found in compiler");
+                let address = self.symbol_table.get(&identifier).expect(&format!("undefined label found in compiler, got: {}", identifier));
                 return address*3;
             }
 

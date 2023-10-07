@@ -6,7 +6,8 @@ use crate::compiler::lexer::Token;
 pub struct Compiler {
     constants: HashMap<i32, String>,
     variables: HashMap<String, String>,
-    libraries: HashMap<String, std::path::PathBuf>
+    libraries: HashMap<String, std::path::PathBuf>,
+    label_index: i32,
 }
 
 impl Compiler {
@@ -14,7 +15,7 @@ impl Compiler {
         let libraries: HashMap<String, std::path::PathBuf> = [
             ("std".to_string(), std::path::PathBuf::from("src/compiler/linker/std.lmasc"))
         ].iter().cloned().collect();
-        Compiler { constants: HashMap::new(), variables: HashMap::new(), libraries: libraries }
+        Compiler { constants: HashMap::new(), variables: HashMap::new(), libraries: libraries, label_index: 0 }
     }
 
 
@@ -23,6 +24,8 @@ impl Compiler {
         for (value, label) in &self.constants {
             out = out + &format!("{label} dat {value}\n");
         }
+
+        out += "_ret dat 0";
         "call _main\nhlt\n".to_owned() + &out 
     }
 
@@ -37,6 +40,7 @@ impl Compiler {
             Node::LIBRARY(library) => { self.compile_library(library) }
             Node::FUNCTION(id, args, block) => { self.compile_function(id, args, *block) }
             Node::RETURN(expression) => { self.compile_return(*expression) }
+            Node::WHILE(condition, expression) => { self.compile_while(*condition, *expression) }
             Node::IF(conditionals, alternative) => { self.compile_if(*conditionals, *alternative) }
             Node::HALT() => { "hlt\n".to_string() }
 
@@ -84,14 +88,10 @@ impl Compiler {
         let lhs = self.compile_node(lhs_node);
         let rhs = self.compile_atom(rhs_node);
 
-        let mut op = op_tok;
-        match op {
-            Token::EE | Token::NE | Token::GT | Token::GTE | Token::LT | Token::LTE  => { 
-                //TODO: BGT, BLT, BLZ implement
-                op = Token::SUB;
-                // additional return, SUB, B<expr>
-            }
-            _ => {}
+        let op;
+        match op_tok {
+            Token::EE | Token::NE | Token::GT | Token::GTE | Token::LT | Token::LTE  => { op = Token::SUB; }
+            _ => { op = op_tok; }
         }
 
         format!("{lhs}\n{:?} {rhs}", op)
@@ -153,17 +153,79 @@ impl Compiler {
             arg_counter += 1;
         }
 
-        format!("{identifier}\n{args_out}\n{}ret\n", self.compile_node(block))
+        format!("{identifier}\n{args_out}{}ret\n", self.compile_node(block))
     }
 
     
     fn compile_if(&mut self, conditionals: Vec<Node>, alternative: Node) -> String {
         //Loop through conditionals, branch if condition to corresponding label (& postfix each with bra .endif)
         //Follow with <else> instructions followed with bra .endif
-        let mut conditional_out = String::new();
-        for conditional in conditionals {
+        let endif = self.generate_label("_l");
+
+        let mut compiled_conditions = String::new();
+        let mut compiled_consequences = String::new();
+        for condition in conditionals {
+            let condition_label = self.generate_label("_l");
+            // let compiled_condition: String = String::new();
+
+            if let Node::CONDITIONAL(condition_node, consequence) = condition {
+                let branches: Vec<String> = self.get_conditional_branch(&condition_node);
+                let condition_expr = self.compile_node(*condition_node);        
+
+                let mut compiled_branches: String = String::new();
+                for branch in branches {
+                    compiled_branches += &format!("{branch} {condition_label}\n");
+                }
+
+                let compiled_consequence = self.compile_node(*consequence);
+
+                compiled_conditions += &format!("{condition_expr}\n{compiled_branches}");
+                compiled_consequences += &format!("{condition_label}\n{compiled_consequence}bra {endif}\n");
+            }
         }
-        "".to_string()
+
+        let compiled_alternative = self.compile_node(alternative);
+        format!("{compiled_conditions}{compiled_alternative}bra {endif}\n{compiled_consequences}{endif}\n")
+    }
+
+
+    fn compile_while(&mut self, condition_node: Node, consequence_node: Node) -> String {
+        let beginwhile = self.generate_label("_l");
+        let consequence = self.generate_label("_l");
+        let endwhile = self.generate_label("_l");
+
+        let branches: Vec<String> = self.get_conditional_branch(&condition_node);
+        let compiled_conditional = self.compile_node(condition_node);        
+
+        let mut compiled_branches: String = String::new();
+        for branch in branches {
+            compiled_branches += &format!("{branch} {consequence}\n");
+        }
+
+        let compiled_consequence = self.compile_node(consequence_node);
+
+        format!("{beginwhile}\n{compiled_conditional}\n{compiled_branches}bra {endwhile}\n{consequence}\n{compiled_consequence}bra {beginwhile}\n{endwhile}\n")
+    }
+
+
+    fn get_conditional_branch(&self, infix: &Node) -> Vec<String> {
+        match infix {
+            Node::INFIX(_, op, _) => {
+                match op {
+                    Token::EE => { vec!["brz".to_string()] }
+                    Token::NE => { vec!["bgt".to_string()] }
+
+                    Token::LT => { vec!["blt".to_string()] }
+                    Token::GT => { vec!["bgt".to_string()] }
+
+                    Token::LTE => { vec!["blt".to_string(), "brz".to_string()] }
+                    Token::GTE => { vec!["bgt".to_string(), "brz".to_string()] }
+
+                    _ => { vec!["bgt".to_string()] }
+                }
+            }
+            _ => { vec!["bgt".to_string()] }
+        }
     }
 
 
@@ -174,6 +236,13 @@ impl Compiler {
         ));
         format!("{expr_out}ret\n")
     }
+
+
+    fn generate_label(&mut self, id: &str) -> String {
+        let label = id.to_owned() + &self.label_index.to_string();
+        self.label_index += 1;
+        label
+    } 
 }
 
 

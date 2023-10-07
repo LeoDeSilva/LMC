@@ -1,0 +1,21 @@
+use std;
+
+fn get_grade(score) {
+    let grade;
+    
+    if score >= 75 {
+        grade = 65;
+    } elif score >= 50 {
+        grade = 66;
+    } else {
+        grade = 67;
+    }
+
+    return grade;
+}
+
+fn _main() {
+    let score = input(); 
+    printc(get_grade(score));
+    return 0;
+}

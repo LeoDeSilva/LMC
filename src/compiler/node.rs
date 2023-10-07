@@ -12,6 +12,7 @@ pub enum Node {
     RETURN(Box<Node>),
     IF(Box<Vec<Node>>, Box<Node>), // list of conditionals, else 
     CONDITIONAL(Box<Node>, Box<Node>), // condition, consequence
+    WHILE(Box<Node>, Box<Node>), // condition, consequence
     HALT(),
 
     IDENTIFIER(String),

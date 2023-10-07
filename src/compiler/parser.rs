@@ -52,6 +52,7 @@ impl Parser {
             match statement {
                 Node::FUNCTION(_, _, _) => {}
                 Node::IF(_, _) => {}
+                Node::WHILE(_, _) => {}
                 _ => { self.eat_error(Token::SEMICOLON) } 
             }
 
@@ -68,6 +69,7 @@ impl Parser {
             Token::FN  => { self.parse_function() }
             Token::RETURN => { self.parse_return() }
             Token::IF => { self.parse_if() }
+            Token::WHILE => { self.parse_while() }
             Token::Identifier(id) =>  { 
                 if self.next_token == Token::EQ {
                     self.parse_assignment(id.clone())
@@ -249,6 +251,7 @@ impl Parser {
             match statement {
                 Node::FUNCTION(_, _, _) => {}
                 Node::IF(_, _) => {}
+                Node::WHILE(_, _) => {}
                 _ => { self.eat_error(Token::SEMICOLON) } 
             }
 
@@ -282,6 +285,17 @@ impl Parser {
         }
 
         Node::IF(Box::new(conditionals), Box::new(else_block))
+    }
+
+
+    fn parse_while(&mut self) -> Node {
+        self.eat();
+        let condition = self.parse_expression(0);
+        self.eat_error(Token::LBRACE);
+        let consequence = self.parse_block();
+        self.eat_error(Token::RBRACE);
+
+        Node::WHILE(Box::new(condition), Box::new(consequence))
     }
 
 
