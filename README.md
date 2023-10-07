@@ -164,18 +164,19 @@ _65 dat 65
 ```rust
 use std;
 
-fn mul(a, b) {
+fn multiply(a, b) {
     let result;
-    for (let i = 0; i < b; i = i + 1) {
+    while b > 0 {
         result = result + a;
+        b = b - 1;
     }
+
     return result;
 }
 
-fn main() {
+fn _main() {
     let a = input();
     let b = input();
-    let result = mul(a, b);
-    print(result);
+    print(multiply(a, b));
 }
 ```
