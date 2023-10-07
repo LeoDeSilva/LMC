@@ -1,0 +1,42 @@
+use std;
+
+fn multiply(a, b) {
+    let result;
+    for let i = 0; i < b; i = i + 1; {
+        result = result + a;
+    }
+
+    return result;
+}
+
+fn divide(a, b) {
+    let result;
+    while a >= b {
+        a = a - b;
+        result = result + 1;
+    }
+
+    return result;
+}
+
+fn calculate(a, op, b) {
+    if op == '+' {
+        return a + b;
+    } elif op == '-' {
+        return a - b;
+    } elif op == '*' {
+        return multiply(a, b); 
+    } elif op == '/' {
+        return divide(a, b);
+    }
+}
+
+fn _main() {
+    let first = input();
+    let operator = input();
+    let second = input();
+
+    let result = calculate(first, operator, second);
+    printc('=');
+    print(result);
+}
