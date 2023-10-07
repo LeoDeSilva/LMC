@@ -1,5 +1,5 @@
 # README
-
+[Documentation: ](https://leo-de-silva.gitbook.io/lmc/)
 * useage : `cargo build -r` : lmc binary located in `targets/release`
 * `lmc emulate <infile.bin>`
 * `lmc assemble <infile.lmasc> <outfile.bin>`
