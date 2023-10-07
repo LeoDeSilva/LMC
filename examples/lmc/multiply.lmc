@@ -2,9 +2,8 @@ use std;
 
 fn multiply(a, b) {
     let result;
-    while b > 0 {
+    for let i = 0; i < b; i = i + 1; {
         result = result + a;
-        b = b - 1;
     }
 
     return result;

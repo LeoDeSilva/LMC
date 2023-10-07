@@ -53,6 +53,7 @@ impl Parser {
                 Node::FUNCTION(_, _, _) => {}
                 Node::IF(_, _) => {}
                 Node::WHILE(_, _) => {}
+                Node::FOR(_, _, _, _) => {}
                 _ => { self.eat_error(Token::SEMICOLON) } 
             }
 
@@ -70,6 +71,7 @@ impl Parser {
             Token::RETURN => { self.parse_return() }
             Token::IF => { self.parse_if() }
             Token::WHILE => { self.parse_while() }
+            Token::FOR => { self.parse_for() }
             Token::Identifier(id) =>  { 
                 if self.next_token == Token::EQ {
                     self.parse_assignment(id.clone())
@@ -252,6 +254,7 @@ impl Parser {
                 Node::FUNCTION(_, _, _) => {}
                 Node::IF(_, _) => {}
                 Node::WHILE(_, _) => {}
+                Node::FOR(_,_,_, _) => {}
                 _ => { self.eat_error(Token::SEMICOLON) } 
             }
 
@@ -296,6 +299,25 @@ impl Parser {
         self.eat_error(Token::RBRACE);
 
         Node::WHILE(Box::new(condition), Box::new(consequence))
+    }
+
+    fn parse_for(&mut self) -> Node {
+        self.eat();
+
+        let declaraion = self.parse_statement();
+        self.eat_error(Token::SEMICOLON);
+
+        let condition = self.parse_expression(0);
+        self.eat_error(Token::SEMICOLON);
+
+        let increment = self.parse_statement();
+        self.eat_error(Token::SEMICOLON);
+        self.eat_error(Token::LBRACE);
+
+        let consequence = self.parse_block();
+        self.eat_error(Token::RBRACE);
+
+        Node::FOR(Box::new(declaraion), Box::new(condition), Box::new(increment), Box::new(consequence))
     }
 
 

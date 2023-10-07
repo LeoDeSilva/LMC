@@ -41,6 +41,7 @@ impl Compiler {
             Node::FUNCTION(id, args, block) => { self.compile_function(id, args, *block) }
             Node::RETURN(expression) => { self.compile_return(*expression) }
             Node::WHILE(condition, expression) => { self.compile_while(*condition, *expression) }
+            Node::FOR(declaration, condition, increment, consequence) => { self.compile_for(*declaration, *condition, *increment, *consequence) }
             Node::IF(conditionals, alternative) => { self.compile_if(*conditionals, *alternative) }
             Node::HALT() => { "hlt\n".to_string() }
 
@@ -208,6 +209,28 @@ impl Compiler {
     }
 
 
+    fn compile_for(&mut self, declaration_node: Node, condition_node: Node, increment_node: Node, consequence_node: Node) -> String {
+        let loop_label = self.generate_label("_l");
+        let conseq_label = self.generate_label("_l");
+        let endloop_label = self.generate_label("_l");
+
+        let declaration = self.compile_node(declaration_node);
+
+        let branch_instructions: Vec<String> = self.get_conditional_branch(&condition_node);
+        let condition = self.compile_node(condition_node);        
+
+        let mut branches: String = String::new();
+        for branch in branch_instructions {
+            branches += &format!("{branch} {conseq_label}\n");
+        }
+
+        let consequence = self.compile_node(consequence_node);
+        let increment = self.compile_node(increment_node);
+
+        format!("{declaration}{loop_label}\n{condition}\n{branches}bra {endloop_label}\n{conseq_label}\n{consequence}{increment}bra {loop_label}\n{endloop_label}\n")
+    }
+
+
     fn get_conditional_branch(&self, infix: &Node) -> Vec<String> {
         match infix {
             Node::INFIX(_, op, _) => {
@@ -260,7 +283,7 @@ mod tests {
             )]
         ))), 
 
-        String::from("call _main\nhlt\nx dat 0\nlda _1\nsta x\n_1 dat 1\n")
+        String::from("call _main\nhlt\nx dat 0\nlda _1\nsta x\n_1 dat 1\n_ret dat 0")
         );
     }
 
