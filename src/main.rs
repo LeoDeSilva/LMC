@@ -63,7 +63,6 @@ fn compile(program: String) -> String {
 
     let mut c = compiler::compiler::Compiler::new();
     let out = c.compile(ast);
-    println!("{}", out);
     out
 }
 

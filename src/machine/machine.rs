@@ -63,9 +63,14 @@ impl Machine {
             0b0111 => { self.pc = if self.acc > 0 && !self.n { operand } else { self.pc }  },  // BGT
             0b1011 => { self.pc = if self.n { operand } else { self.pc }  },  // BLT
             0b1000 => {
-                let mut line = String::new();
-                std::io::stdin().read_line(&mut line).unwrap();
-                self.acc = line.trim().parse::<u16>().unwrap();
+                let mut rl = rustyline::DefaultEditor::new().unwrap();
+                let line = rl.readline("").unwrap();
+
+                if !(line.trim().parse::<u16>().is_ok()) && line.trim().len() == 1 {
+                    self.acc = line.chars().nth(0).unwrap() as u16;
+                } else {
+                    self.acc = line.trim().parse::<u16>().unwrap();
+                }
             },  // INP
             0b1001 => { println!("{:?}", self.acc) },  // OUT
             0b1010 => { println!("{}", char::from_u32(self.acc as u32).expect("invalid ASCII char")); },  // OTC

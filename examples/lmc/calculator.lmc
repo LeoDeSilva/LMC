@@ -37,6 +37,5 @@ fn _main() {
     let second = input();
 
     let result = calculate(first, operator, second);
-    printc('=');
     print(result);
 }

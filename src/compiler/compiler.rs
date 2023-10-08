@@ -6,14 +6,15 @@ use crate::compiler::lexer::Token;
 pub struct Compiler {
     constants: HashMap<i32, String>,
     variables: HashMap<String, String>,
-    libraries: HashMap<String, std::path::PathBuf>,
+    libraries: HashMap<String, String>,
     label_index: i32,
 }
 
 impl Compiler {
     pub fn new() -> Self {
-        let libraries: HashMap<String, std::path::PathBuf> = [
-            ("std".to_string(), std::path::PathBuf::from("src/compiler/linker/std.lmasc"))
+        let libraries: HashMap<String, String> = [
+            // ("std".to_string(), std::path::PathBuf::from("src/compiler/linker/std.lmasc"))
+            ("std".to_string(), include_str!("linker/std.lmasc").to_string())
         ].iter().cloned().collect();
         Compiler { constants: HashMap::new(), variables: HashMap::new(), libraries: libraries, label_index: 0 }
     }
@@ -115,8 +116,8 @@ impl Compiler {
 
 
     fn compile_library(&mut self, library: String) -> String {
-        let lib_path = self.libraries.get(&library).expect(&format!("No library exists with name: {}", library));
-        let lib_content = std::fs::read_to_string(lib_path).expect("could not read library");
+        let lib_content: String = self.libraries.get(&library).expect(&format!("No library exists with name: {}", library)).clone();
+        // let lib_content = std::fs::read_to_string(lib_path).expect("could not read library");
         lib_content + "\n"
     }
 

@@ -1,0 +1,203 @@
+call _main
+hlt
+
+print       lda _p0
+            out
+            ret
+
+printc      lda _p0
+            otc
+            ret
+
+input       inp
+            sta _ret
+            ret
+multiply
+    a dat 0
+    lda _p0
+    sta a
+
+    b dat 0
+    lda _p1
+    sta b
+
+    result dat 0
+    lda _0
+    sta result
+
+    i dat 0
+    lda _0
+    sta i
+
+_l0
+    lda i
+    SUB b
+    blt _l1
+    bra _l2
+_l1
+    lda result
+    ADD a
+    sta result
+    lda i
+    ADD _1
+    sta i
+    bra _l0
+_l2
+    _ret dat 0
+    lda result
+    sta _ret
+    ret
+
+divide
+    a dat 0
+    lda _p0
+    sta a
+
+    b dat 0
+    lda _p1
+    sta b
+
+    result dat 0
+    lda _0
+    sta result
+
+_l3
+    lda a
+    SUB b
+    bgt _l4
+    brz _l4
+    bra _l5
+_l4
+    lda a
+    SUB b
+    sta a
+    lda result
+    ADD _1
+    sta result
+    bra _l3
+_l5
+    _ret dat 0
+    lda result
+    sta _ret
+    ret
+
+calculate
+    a dat 0
+    lda _p0
+    sta a
+
+    op dat 0
+    lda _p1
+    sta op
+
+    b dat 0
+    lda _p2
+    sta b
+
+    lda op
+    SUB _43
+    brz _l7
+    lda op
+    SUB _45
+    brz _l8
+    lda op
+    SUB _42
+    brz _l9
+    lda op
+    SUB _47
+    brz _l10
+    bra _l6
+_l7
+    _ret dat 0
+    lda a
+    ADD b
+    sta _ret
+    ret
+    bra _l6
+_l8
+    _ret dat 0
+    lda a
+    SUB b
+    sta _ret
+    ret
+    bra _l6
+_l9
+    _ret dat 0
+    _p0 dat 0
+    lda a
+    sta _p0
+
+    _p1 dat 0
+    lda b
+    sta _p1
+
+    call multiply
+    lda _ret
+
+    sta _ret
+    ret
+    
+    bra _l6
+_l10
+    _ret dat 0
+    _p0 dat 0
+    lda a
+    sta _p0
+
+    _p1 dat 0
+    lda b
+    sta _p1
+
+    call divide
+    lda _ret
+
+    sta _ret
+    ret
+    bra _l6
+_l6
+    ret
+
+_main
+    first dat 0
+    call input
+    lda _ret
+    sta first
+    
+    operator dat 0
+    call input
+    lda _ret
+    sta operator
+
+    second dat 0
+    call input
+    lda _ret
+    sta second
+
+    result dat 0
+    _p0 dat 0
+    lda first
+    sta _p0
+    _p1 dat 0
+    lda operator
+    sta _p1
+    _p2 dat 0
+    lda second
+    sta _p2
+    call calculate
+    lda _ret
+
+    sta result
+    _p0 dat 0
+    lda result
+    sta _p0
+    call print
+    lda _ret
+    ret
+
+_0 dat 0
+_43 dat 43
+_47 dat 47
+_45 dat 45
+_42 dat 42
+_1 dat 1
+_ret dat 0

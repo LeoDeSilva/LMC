@@ -45,6 +45,7 @@ pub struct Lexer {
     program: Vec<char>,
     position: usize,
     read_position: usize,
+    line_number: usize,
     ch: char,
 }
 
@@ -54,7 +55,7 @@ impl Lexer {
         let read_position: usize = 0;
         let ch = '\0';
 
-        Lexer { program: program, position: position, read_position: read_position, ch: ch }
+        Lexer { program: program, position: position, read_position: read_position, line_number: 1, ch: ch }
     }
 
     fn eat_char(&mut self) {
@@ -62,6 +63,10 @@ impl Lexer {
             self.ch = '\0';
         } else {
             self.ch = self.program[self.read_position];
+        }
+
+        if self.ch == '\n' {
+            self.read_position += 1;
         }
 
         self.position = self.read_position;
@@ -107,11 +112,12 @@ impl Lexer {
             ';' => { tok = Token::SEMICOLON }
             '\0' => { tok = Token::EOF }
             '"' => { tok = self.lex_string() }
+            '\'' => { tok = self.lex_char() }
 
             '0'..='9' => { return self.lex_number() }
             '_' |'A'..='z' => { return self.lex_identifier() }
 
-            _ => { panic!("Unexpected character found in lexer: {}", self.ch) }
+            _ => { panic!("Unexpected character found in lexer: {} line: {}", self.ch, self.line_number) }
         }
 
         self.eat_char();
@@ -176,6 +182,17 @@ impl Lexer {
         Token::String(self.program[position..self.position].to_vec().iter().collect())
     }
 
+    fn lex_char(&mut self) -> Token {
+        self.eat_char();
+        let ch = self.ch;
+        self.eat_char();
+        if self.ch != '\'' {
+            panic!("Expected ' in char, got: {}", self.ch);
+        }
+
+        Token::Number(ch as i32)
+    }
+
     fn eat_whitespace(&mut self) {
         while self.position < self.program.len() && self.ch.is_ascii_whitespace() {
             self.eat_char();
@@ -237,6 +254,15 @@ mod tests {
         let mut l = Lexer::new(String::from("\"Hello World\"").chars().collect());
         assert_eq!(l.lex(), vec![
             Token::String(String::from("Hello World")),
+            Token::EOF,
+        ])
+    }
+
+    #[test]
+    fn test_lex_char() {
+        let mut l = Lexer::new("'A'".to_string().chars().collect());
+        assert_eq!(l.lex(), vec![
+            Token::Number(65),
             Token::EOF,
         ])
     }
