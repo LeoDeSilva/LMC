@@ -9,7 +9,7 @@
 (alternatively run with `cargo run <args>`)
 
 ```
-=> each instruction is 3 bytes (1 byte opcode, and 2 bytes operannd)
+=> each instruction is 3 bytes (1 byte opcode, and 2 bytes operand)
 
 opcode   operand
 xxxxxxxx yyyyyyyyyyyyyyyy
