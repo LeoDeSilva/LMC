@@ -184,9 +184,13 @@ impl Lexer {
 
     fn lex_char(&mut self) -> Token {
         self.eat_char();
-        let ch = self.ch;
+        let mut ch = self.ch;
         self.eat_char();
-        if self.ch != '\'' {
+        if ch == '\\' {
+            let escape = format!("{}{}", ch, self.ch).replace("\\n", "\n");
+            ch = escape.chars().next().unwrap();
+            self.eat_char();
+        } else if self.ch != '\'' {
             panic!("Expected ' in char, got: {}", self.ch);
         }
 

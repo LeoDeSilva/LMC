@@ -1,0 +1,44 @@
+use std;
+
+fn mod(a, b) {
+    let result;
+    while a >= b {
+        a = a - b;
+        result = result + 1;
+    }
+
+    return a;
+}
+
+fn print_string(a, b, c, d) {
+    printc(a);
+    printc(b);
+    printc(c);
+    printc(d);
+    return;
+}
+
+fn fizzbuzz(n) {
+    if mod(n, 3) == 0 {
+        print_string('F', 'i', 'z', 'z');
+
+        if mod(n, 5) == 0 {
+            print_string('B', 'u', 'z', 'z');
+        }
+    
+    } elif mod(n, 5) == 0 {
+        print_string('B', 'u', 'z', 'z');
+
+    } else {
+        print(n);
+    }
+
+    printc('\n');
+    return 0;
+}
+
+fn _main() {
+    for let i = 1; i <= 100; i = i + 1; {
+        fizzbuzz(i);
+    }
+} 

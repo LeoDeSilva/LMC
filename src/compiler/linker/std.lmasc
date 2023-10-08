@@ -2,6 +2,18 @@ print       lda _p0
             out
             ret
 
+println     lda _p0 
+            out
+            lda _newline
+            otc
+            ret
+
+printcln    lda _p0
+            otc
+            lda _newline
+            otc
+            ret
+
 printc      lda _p0
             otc
             ret
@@ -9,3 +21,5 @@ printc      lda _p0
 input       inp
             sta _ret
             ret
+
+_newline    dat 10

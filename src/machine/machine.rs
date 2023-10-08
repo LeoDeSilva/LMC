@@ -72,8 +72,8 @@ impl Machine {
                     self.acc = line.trim().parse::<u16>().unwrap();
                 }
             },  // INP
-            0b1001 => { println!("{:?}", self.acc) },  // OUT
-            0b1010 => { println!("{}", char::from_u32(self.acc as u32).expect("invalid ASCII char")); },  // OTC
+            0b1001 => { print!("{:?}", self.acc) },  // OUT
+            0b1010 => { print!("{}", char::from_u32(self.acc as u32).expect("invalid ASCII char")); },  // OTC
             0b1100 => {},
 
             0b1101 => { // CALL

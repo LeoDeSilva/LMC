@@ -12,5 +12,5 @@ fn multiply(a, b) {
 fn _main() {
     let a = input();
     let b = input();
-    print(multiply(a, b));
+    println(multiply(a, b));
 }
