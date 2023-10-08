@@ -1,6 +1,6 @@
 # README
 [Documentation](https://leo-de-silva.gitbook.io/lmc/)\
-[LMC Instruction Set](https://peterhigginson.co.uk/lmc/help.html)
+[LMC Instruction Set](https://peterhigginson.co.uk/lmc/help.html)\
 [LMC Wikipedia](https://en.wikipedia.org/wiki/Little_man_computer)
 
 * useage : `cargo build -r` : lmc binary located in `targets/release`
