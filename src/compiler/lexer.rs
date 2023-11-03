@@ -117,7 +117,7 @@ impl Lexer {
             '0'..='9' => { return self.lex_number() }
             '_' |'A'..='z' => { return self.lex_identifier() }
 
-            _ => { panic!("Unexpected character found in lexer: {} line: {}", self.ch, self.line_number) }
+            _ => { panic!("Unexpected character found in lexer: {:?} line: {}", self.ch, self.line_number) }
         }
 
         self.eat_char();
@@ -198,7 +198,7 @@ impl Lexer {
     }
 
     fn eat_whitespace(&mut self) {
-        while self.position < self.program.len() && self.ch.is_ascii_whitespace() {
+        while self.position <= self.program.len() && self.ch.is_ascii_whitespace() {
             self.eat_char();
         }
     }
