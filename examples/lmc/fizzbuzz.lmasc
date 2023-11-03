@@ -1,0 +1,233 @@
+call _main
+hlt
+print       lda _p0
+            out
+            ret
+
+println     lda _p0 
+            out
+            lda _newline
+            otc
+            ret
+
+printcln    lda _p0
+            otc
+            lda _newline
+            otc
+            ret
+
+printc      lda _p0
+            otc
+            ret
+
+input       inp
+            sta _ret
+            ret
+
+_newline    dat 10
+mod
+a dat 0
+lda _p0
+sta a
+b dat 0
+lda _p1
+sta b
+result dat 0
+lda _0
+sta result
+_l0
+lda a
+SUB b
+bgt _l1
+brz _l1
+bra _l2
+_l1
+lda a
+SUB b
+sta a
+lda result
+ADD _1
+sta result
+bra _l0
+_l2
+_ret dat 0
+lda a
+sta _ret
+ret
+print_string
+a dat 0
+lda _p0
+sta a
+b dat 0
+lda _p1
+sta b
+c dat 0
+lda _p2
+sta c
+d dat 0
+lda _p3
+sta d
+_p0 dat 0
+lda a
+sta _p0
+call printc
+lda _ret
+_p0 dat 0
+lda b
+sta _p0
+call printc
+lda _ret
+_p0 dat 0
+lda c
+sta _p0
+call printc
+lda _ret
+_p0 dat 0
+lda d
+sta _p0
+call printc
+lda _ret
+_ret dat 0
+lda _0
+sta _ret
+ret
+fizzbuzz
+n dat 0
+lda _p0
+sta n
+_p0 dat 0
+lda n
+sta _p0
+_p1 dat 0
+lda _3
+sta _p1
+call mod
+lda _ret
+
+SUB _0
+brz _l4
+_p0 dat 0
+lda n
+sta _p0
+_p1 dat 0
+lda _5
+sta _p1
+call mod
+lda _ret
+
+SUB _0
+brz _l7
+_p0 dat 0
+lda n
+sta _p0
+call print
+lda _ret
+bra _l3
+_l4
+_p0 dat 0
+lda _70
+sta _p0
+_p1 dat 0
+lda _105
+sta _p1
+_p2 dat 0
+lda _122
+sta _p2
+_p3 dat 0
+lda _122
+sta _p3
+call print_string
+lda _ret
+_p0 dat 0
+lda n
+sta _p0
+_p1 dat 0
+lda _5
+sta _p1
+call mod
+lda _ret
+
+SUB _0
+brz _l6
+bra _l5
+_l6
+_p0 dat 0
+lda _66
+sta _p0
+_p1 dat 0
+lda _117
+sta _p1
+_p2 dat 0
+lda _122
+sta _p2
+_p3 dat 0
+lda _122
+sta _p3
+call print_string
+lda _ret
+bra _l5
+_l5
+bra _l3
+_l7
+_p0 dat 0
+lda _66
+sta _p0
+_p1 dat 0
+lda _117
+sta _p1
+_p2 dat 0
+lda _122
+sta _p2
+_p3 dat 0
+lda _122
+sta _p3
+call print_string
+lda _ret
+bra _l3
+_l3
+_p0 dat 0
+lda _10
+sta _p0
+call printc
+lda _ret
+_ret dat 0
+lda _0
+sta _ret
+ret
+_main
+i dat 0
+lda _1
+sta i
+_l8
+lda i
+SUB _100
+blt _l9
+brz _l9
+bra _l10
+_l9
+_p0 dat 0
+lda i
+sta _p0
+call fizzbuzz
+lda _ret
+lda i
+ADD _1
+sta i
+bra _l8
+_l10
+ret
+ret
+ret
+ret
+_1 dat 1
+_10 dat 10
+_122 dat 122
+_117 dat 117
+_0 dat 0
+_100 dat 100
+_3 dat 3
+_70 dat 70
+_105 dat 105
+_5 dat 5
+_66 dat 66
+_ret dat 0

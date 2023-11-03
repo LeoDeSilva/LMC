@@ -16,6 +16,6 @@ fn get_grade(score) {
 
 fn _main() {
     let score = input(); 
-    printlnc(get_grade(score));
+    printcln(get_grade(score));
     return 0;
 }
